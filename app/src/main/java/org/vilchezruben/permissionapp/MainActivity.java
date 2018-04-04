@@ -1,6 +1,8 @@
 package org.vilchezruben.permissionapp;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -10,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -59,8 +62,30 @@ public class MainActivity extends AppCompatActivity {
     private void makeCall() {
         Intent intent = new Intent(Intent.ACTION_CALL);
         intent.setData(Uri.parse("tel:" + "12345678"));
+        //valida si la app tiene permiso
        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-           requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CODE);
+           //Muestra una explicacion de porque se necesita el permiso si este fue  negado la primera vez
+           if(shouldShowRequestPermissionRationale(Manifest.permission.CALL_PHONE)){
+               new AlertDialog.Builder(MainActivity.this)
+                       .setTitle("Call Permission")
+                       .setMessage("Hi there! We can't call anyone without the call permission, could you please grant it?")
+                       .setPositiveButton("Yep", new DialogInterface.OnClickListener() {
+                           @Override
+                           public void onClick(DialogInterface dialogInterface, int i) {
+                               requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CODE);
+                           }
+                       })
+                       .setNegativeButton("No thanks", new DialogInterface.OnClickListener() {
+                           @Override
+                           public void onClick(DialogInterface dialogInterface, int i) {
+                               Toast.makeText(MainActivity.this,":(",Toast.LENGTH_LONG).show();
+                           }
+                       }).show();
+           }else{
+               // pide permiso
+               requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_CODE);
+
+           }
            return;
        }
         startActivity(intent);
